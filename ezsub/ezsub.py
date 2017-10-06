@@ -72,7 +72,7 @@ class EZSUB:
             if fixedParameters is not None:
                 for fP in fixedParameters:
                     if fP[0] in self.jobNameExtra.keys():
-                        jobName_str += (fP[0]+"="+self.jobNameExtra[fP[0]]%fP[1]+"_")
+                        jobName_str += (fP[0]+self.jobNameExtra[fP[0]]%fP[1]+"_")
 
         cmdVar_list = []
         cmdVar_jobName_extra_list = []
