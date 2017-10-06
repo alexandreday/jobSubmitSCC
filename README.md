@@ -10,3 +10,5 @@ pip install .
 ```
 That's it ! You can import the ```ezsub.EZSUB()``` class and submit your jobs really easily. Check out the example file for more info on the format of the command or just try running it.
 
+# Documentation
+To generate the documentation go to ```doc/``` and use ```make html```. The produced html file will be in the ```_build``` directory.
