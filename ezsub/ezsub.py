@@ -89,7 +89,7 @@ class EZSUB:
                     for vPN in vParNames:
                         tmp = jobName_str
                         if vPN in self.jobNameExtra.keys():
-                            tmp += (vPN+"="+self.jobNameExtra[vPN]%tmp_name_to_value[vPN]+"_")
+                            tmp += (vPN+self.jobNameExtra[vPN]%tmp_name_to_value[vPN]+"_")
                 
                     cmdVar_jobName_extra_list.append(tmp[:-1])
         
@@ -118,7 +118,6 @@ class EZSUB:
                 #print(fullScript)
                 f.write(fullScript)
                 f.close()
-                
                 os.system('qsub submit_scc.sh')
                 os.system('rm submit_scc.sh')
                 time.sleep(0.05)
