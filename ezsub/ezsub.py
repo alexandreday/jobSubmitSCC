@@ -117,9 +117,10 @@ class EZSUB:
                 fullScript = fullScript.replace("*command*", full_cmd)
                 #print(fullScript)
                 f.write(fullScript)
+                f.close()
+                
                 os.system('qsub submit_scc.sh')
                 os.system('rm submit_scc.sh')
-                f.close()
                 time.sleep(0.05)
         else:
             full_cmd = main_cmd
