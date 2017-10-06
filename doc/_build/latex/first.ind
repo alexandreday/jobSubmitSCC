@@ -1,0 +1,12 @@
+\begin{sphinxtheindex}
+\def\bigletter#1{{\Large\sffamily#1}\nopagebreak\vspace{1mm}}
+
+  \bigletter E
+  \item EZSUB (class in ezsub), \hyperpage{3}
+  \item ezsub (module), \hyperpage{3}
+
+  \indexspace
+  \bigletter S
+  \item submit() (ezsub.EZSUB method), \hyperpage{3}
+
+\end{sphinxtheindex}
