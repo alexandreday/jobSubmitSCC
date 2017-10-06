@@ -1,0 +1,198 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Example of use &#8212; JobSubmitSCC  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="example-of-use">
+<h1>Example of use<a class="headerlink" href="#example-of-use" title="Permalink to this headline">¶</a></h1>
+<p><strong>The header:</strong></p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ezsub</span> <span class="kn">import</span> <span class="n">EZSUB</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+</pre></div>
+</div>
+<p><strong>Submit a single job:</strong></p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># define macro parameters</span>
+<span class="n">so_easy</span> <span class="o">=</span> <span class="n">EZSUB</span><span class="p">(</span>
+                <span class="n">projectName</span><span class="o">=</span><span class="s2">&quot;fheating&quot;</span><span class="p">,</span>
+                <span class="n">jobName</span><span class="o">=</span><span class="s2">&quot;MC&quot;</span>
+                <span class="p">)</span>
+<span class="c1"># submit job with parameters T=2.26 and J=1.0</span>
+<span class="n">so_easy</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span>
+                <span class="n">command</span> <span class="o">=</span> <span class="s1">&#39;~/.conda/envs/py35/bin/python main.py&#39;</span><span class="p">,</span> <span class="c1"># main.py is the python script you want to submit</span>
+                <span class="n">fixedParameters</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;T&#39;</span><span class="p">,</span><span class="mf">2.26</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;J&#39;</span><span class="p">,</span><span class="mf">1.0</span><span class="p">)]</span>
+                <span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Submit a multiple jobs:</strong></p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># submit job with parameters T=[1.0,2.0,3.0,4.0] and J=1.0</span>
+<span class="n">so_easy</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span>
+                <span class="n">command</span> <span class="o">=</span> <span class="s1">&#39;~/.conda/envs/py35/bin/python main.py&#39;</span><span class="p">,</span>
+                <span class="n">fixedParameters</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;J&#39;</span><span class="p">,</span><span class="mf">1.0</span><span class="p">)],</span>
+                <span class="n">variableParameters</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;T&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">4.01</span><span class="p">,</span><span class="mf">1.0</span><span class="p">))]</span>
+                <span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Submit multiple jobs, and have clear job name identifiers:</strong></p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># define macro parameters and job identifier syntax</span>
+<span class="n">so_easy</span> <span class="o">=</span> <span class="n">EZSUB</span><span class="p">(</span>
+                <span class="n">projectName</span><span class="o">=</span><span class="s2">&quot;fheating&quot;</span><span class="p">,</span>
+                <span class="n">jobName</span><span class="o">=</span><span class="s2">&quot;MC&quot;</span><span class="p">,</span>
+                <span class="n">jobNameExtra</span><span class="o">=</span><span class="p">[(</span><span class="s2">&quot;T&quot;</span><span class="p">,</span><span class="s2">&quot;</span><span class="si">%.2f</span><span class="s2">&quot;</span><span class="p">),(</span><span class="s2">&quot;J&quot;</span><span class="p">,</span><span class="s2">&quot;</span><span class="si">%.1f</span><span class="s2">&quot;</span><span class="p">)]</span>
+                <span class="c1"># jobNameExtra specifies the format of the param. to track in the job name</span>
+                <span class="p">)</span>
+ <span class="c1"># submit job with parameters T=[1.0,2.0,3.0,4.0] and J=1.0</span>
+<span class="n">so_easy</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span>
+                <span class="n">command</span> <span class="o">=</span> <span class="s1">&#39;~/.conda/envs/py35/bin/python main.py&#39;</span><span class="p">,</span>
+                <span class="n">fixedParameters</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;T&#39;</span><span class="p">,</span><span class="mf">2.26</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;J&#39;</span><span class="p">,</span><span class="mf">1.0</span><span class="p">)]</span>
+                <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="documentation">
+<h1>Documentation<a class="headerlink" href="#documentation" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+</div>
+<span class="target" id="module-ezsub"></span><dl class="class">
+<dt id="ezsub.EZSUB">
+<em class="property">class </em><code class="descclassname">ezsub.</code><code class="descname">EZSUB</code><span class="sig-paren">(</span><em>projectName</em>, <em>jobName</em>, <em>jobNameExtra=None</em>, <em>wallTime=(2</em>, <em>0</em>, <em>0)</em>, <em>email=None</em>, <em>jobNumber=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ezsub/ezsub.html#EZSUB"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ezsub.EZSUB" title="Permalink to this definition">¶</a></dt>
+<dd><p>Python 3 script for easily submitting jobs on the SCC !</p>
+<dl class="method">
+<dt id="ezsub.EZSUB.submit">
+<code class="descname">submit</code><span class="sig-paren">(</span><em>command</em>, <em>fixedParameters=None</em>, <em>variableParameters=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ezsub/ezsub.html#EZSUB.submit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ezsub.EZSUB.submit" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>fixedParameters: list of tuples = (string, float or int)</dt>
+<dd><p class="first">specifies the fixed parameters passed to the command line.
+For instance, if parameter T takes values 2.26 and J takes values 1.0, this is specified as:</p>
+<blockquote>
+<div>[(“T”,2.26),(“J”,1.0)]</div></blockquote>
+<dl class="last docutils">
+<dt>This will be translated to:</dt>
+<dd>“T=2.26 J=1.0” on the commmand line.</dd>
+</dl>
+</dd>
+<dt>variableParameters: list of tuples = (string, iterable)</dt>
+<dd><p class="first">specifies the variable parameters passed to the command line.
+For instance, if parameter T takes values [1.0, 2.0, 2.26, 3.0] and J takes values [1.0, 1.1, 1.2], this is specified as:</p>
+<blockquote>
+<div>[(“T”,[1.0, 2.0, 2.26, 3.0]),(“J”,np.arange(1.0, 1.21, 0.1))]</div></blockquote>
+<dl class="last docutils">
+<dt>This will trigger a loop over the parameters, giving the command line the following series of parameters:</dt>
+<dd>“T=1.0 J=1.0” 
+“T=1.0 J=1.1”
+“T=1.0 J=1.2”
+“T=2.0 J=1.0”
+…</dd>
+<dt>Some notes: </dt>
+<dd><ul class="first last simple">
+<li>maximum precision on float parameters is 3 decimal places</li>
+<li>format of specified parameters is always parameter=parameter_value, with parameter a string and parameter_value a numeric type</li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
+<li><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
+<li><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></li>
+</ul>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="#">JobSubmitSCC</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Alexandre Day.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/masta.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

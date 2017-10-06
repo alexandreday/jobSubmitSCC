@@ -30,14 +30,14 @@ class EZSUB:
         Parameters
         ------------
         fixedParameters: list of tuples = (string, float or int)
-            specifies the fixed parameters passed to the command line.
+            Specifies the fixed parameters passed to the command line.
             For instance, if parameter T takes values 2.26 and J takes values 1.0, this is specified as:
                 [("T",2.26),("J",1.0)]
             This will be translated to:
                 "T=2.26 J=1.0" on the commmand line.
         
         variableParameters: list of tuples = (string, iterable)
-            specifies the variable parameters passed to the command line.
+            Specifies the variable parameters passed to the command line.
             For instance, if parameter T takes values [1.0, 2.0, 2.26, 3.0] and J takes values [1.0, 1.1, 1.2], this is specified as:
                 [("T",[1.0, 2.0, 2.26, 3.0]),("J",np.arange(1.0, 1.21, 0.1))]
             This will trigger a loop over the parameters, giving the command line the following series of parameters:
@@ -50,6 +50,7 @@ class EZSUB:
             Some notes: 
                 - maximum precision on float parameters is 3 decimal places
                 - format of specified parameters is always parameter=parameter_value, with parameter a string and parameter_value a numeric type
+        
         """
 
         bashScript = template() # template format for scc qsub ...
@@ -140,24 +141,4 @@ class EZSUB:
             os.system('rm submit_scc.sh')
             f.close()
             time.sleep(0.05)
-
-
-    #$ -pe omp 4 submission.sh \n
-    #$ -l mem_per_core=4G# more memory \n
-    #$ -M mbukov@bu.edu \n
-
-#    source activate py27
-#~/.conda/envs/py27/bin/python main_RL.py 2 1 2 1
-#!/bin/bash -login
-#$ -P fheating
-#$ -N jobRL_1_2_1_4
-#$ -l h_rt=12:00:00
-#$ -m ae
-#$ -m n
-#$ -pe omp 4 submission.sh #request more processors
-#$ -l mem_per_core=4G# more memory
-#$ -M mbukov@bu.edu
-
-
-
     

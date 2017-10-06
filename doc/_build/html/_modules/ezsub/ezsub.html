@@ -1,0 +1,260 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>ezsub.ezsub &#8212; JobSubmitSCC  documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ezsub.ezsub</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">time</span><span class="o">,</span> <span class="nn">itertools</span>
+
+<span class="k">def</span> <span class="nf">template</span><span class="p">():</span>
+    <span class="k">return</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    #!/bin/bash -login</span><span class="se">\n</span><span class="s2"></span>
+<span class="s2">    #$ -P *projectName*</span><span class="se">\n</span><span class="s2"> </span>
+<span class="s2">    #$ -N *jobName*</span><span class="se">\n</span><span class="s2"> </span>
+<span class="s2">    #$ -l h_rt=*wallTime*</span><span class="se">\n</span><span class="s2"></span>
+<span class="s2">    #$ -m ae</span><span class="se">\n</span><span class="s2"></span>
+<span class="s2">    #$ -m n</span><span class="se">\n</span><span class="s2"></span>
+<span class="s2">    #$ -M *email*</span><span class="se">\n</span><span class="s2"></span>
+<span class="s2">    *command*</span>
+<span class="s2">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="EZSUB"><a class="viewcode-back" href="../../masta.html#ezsub.EZSUB">[docs]</a><span class="k">class</span> <span class="nc">EZSUB</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Python 3 script for easily submitting jobs on the SCC !</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">projectName</span><span class="p">,</span> <span class="n">jobName</span><span class="p">,</span> <span class="n">jobNameExtra</span><span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">wallTime</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">email</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">jobNumber</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">projectName</span> <span class="o">=</span> <span class="n">projectName</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">jobName</span> <span class="o">=</span> <span class="n">jobName</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wallTime</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{:02d}</span><span class="s2">:</span><span class="si">{:02d}</span><span class="s2">:</span><span class="si">{:02d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="n">wallTime</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">email</span> <span class="o">=</span> <span class="n">email</span>    
+        <span class="bp">self</span><span class="o">.</span><span class="n">jobNameExtra</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">jobNameExtra</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">jobNumber</span> <span class="o">=</span> <span class="n">jobNumber</span>
+
+<div class="viewcode-block" id="EZSUB.submit"><a class="viewcode-back" href="../../masta.html#ezsub.EZSUB.submit">[docs]</a>    <span class="k">def</span> <span class="nf">submit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">command</span><span class="p">,</span> <span class="n">fixedParameters</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">variableParameters</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ------------</span>
+<span class="sd">        fixedParameters: list of tuples = (string, float or int)</span>
+<span class="sd">            specifies the fixed parameters passed to the command line.</span>
+<span class="sd">            For instance, if parameter T takes values 2.26 and J takes values 1.0, this is specified as:</span>
+<span class="sd">                [(&quot;T&quot;,2.26),(&quot;J&quot;,1.0)]</span>
+<span class="sd">            This will be translated to:</span>
+<span class="sd">                &quot;T=2.26 J=1.0&quot; on the commmand line.</span>
+<span class="sd">        </span>
+<span class="sd">        variableParameters: list of tuples = (string, iterable)</span>
+<span class="sd">            specifies the variable parameters passed to the command line.</span>
+<span class="sd">            For instance, if parameter T takes values [1.0, 2.0, 2.26, 3.0] and J takes values [1.0, 1.1, 1.2], this is specified as:</span>
+<span class="sd">                [(&quot;T&quot;,[1.0, 2.0, 2.26, 3.0]),(&quot;J&quot;,np.arange(1.0, 1.21, 0.1))]</span>
+<span class="sd">            This will trigger a loop over the parameters, giving the command line the following series of parameters:</span>
+<span class="sd">                &quot;T=1.0 J=1.0&quot; </span>
+<span class="sd">                &quot;T=1.0 J=1.1&quot;</span>
+<span class="sd">                &quot;T=1.0 J=1.2&quot;</span>
+<span class="sd">                &quot;T=2.0 J=1.0&quot;</span>
+<span class="sd">                ...</span>
+
+<span class="sd">            Some notes: </span>
+<span class="sd">                - maximum precision on float parameters is 3 decimal places</span>
+<span class="sd">                - format of specified parameters is always parameter=parameter_value, with parameter a string and parameter_value a numeric type</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">bashScript</span> <span class="o">=</span> <span class="n">template</span><span class="p">()</span> <span class="c1"># template format for scc qsub ...</span>
+        <span class="n">bashScript</span> <span class="o">=</span> <span class="n">bashScript</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;*projectName*&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">projectName</span><span class="p">)</span>
+        <span class="n">bashScript</span> <span class="o">=</span> <span class="n">bashScript</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;*wallTime*&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">wallTime</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">email</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">bashScript</span> <span class="o">=</span> <span class="n">bashScript</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;*email*&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">email</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">bashScript</span> <span class="o">=</span> <span class="n">bashScript</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;#$ -M *email*</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+            
+        <span class="n">main_cmd</span> <span class="o">=</span> <span class="n">command</span>
+        <span class="n">jobNameList_dict</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">jobNameExtra</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">bashScript</span> <span class="o">=</span> <span class="n">bashScript</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;*jobName*&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">jobName</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">jobName_str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+            <span class="k">if</span> <span class="n">fixedParameters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">fP</span> <span class="ow">in</span> <span class="n">fixedParameters</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">fP</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">jobNameExtra</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                        <span class="n">jobName_str</span> <span class="o">+=</span> <span class="p">(</span><span class="n">fP</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="s2">&quot;=&quot;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">jobNameExtra</span><span class="p">[</span><span class="n">fP</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">%</span><span class="n">fP</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="s2">&quot;_&quot;</span><span class="p">)</span>
+
+        <span class="n">cmdVar_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">cmdVar_jobName_extra_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="n">variableParameters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">vParNames</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">variableParameters</span><span class="p">]</span>
+            <span class="n">vParIterables</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">variableParameters</span><span class="p">]</span>
+            <span class="n">n_varPar</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">vParNames</span><span class="p">)</span>
+    
+            <span class="k">for</span> <span class="n">values</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="n">vParIterables</span><span class="p">)):</span>
+                <span class="n">tmp_name_to_value</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">vParNames</span><span class="p">,</span> <span class="n">values</span><span class="p">))</span>
+                <span class="n">cmdVar_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">vParNames</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="s2">&quot;=&quot;</span><span class="o">+</span><span class="s2">&quot;</span><span class="si">%.3f</span><span class="s2">&quot;</span><span class="o">%</span><span class="n">vPV</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">vPV</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">values</span><span class="p">)]))</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">jobNameExtra</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">vPN</span> <span class="ow">in</span> <span class="n">vParNames</span><span class="p">:</span>
+                        <span class="n">tmp</span> <span class="o">=</span> <span class="n">jobName_str</span>
+                        <span class="k">if</span> <span class="n">vPN</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">jobNameExtra</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                            <span class="n">tmp</span> <span class="o">+=</span> <span class="p">(</span><span class="n">vPN</span><span class="o">+</span><span class="s2">&quot;=&quot;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">jobNameExtra</span><span class="p">[</span><span class="n">vPN</span><span class="p">]</span><span class="o">%</span><span class="n">tmp_name_to_value</span><span class="p">[</span><span class="n">vPN</span><span class="p">]</span><span class="o">+</span><span class="s2">&quot;_&quot;</span><span class="p">)</span>
+                
+                    <span class="n">cmdVar_jobName_extra_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmp</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        
+        <span class="k">if</span> <span class="n">fixedParameters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">cmdFix</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">vFN</span><span class="o">+</span><span class="s2">&quot;=&quot;</span><span class="o">+</span><span class="s2">&quot;</span><span class="si">%.3f</span><span class="s2">&quot;</span><span class="o">%</span><span class="n">vFV</span> <span class="k">for</span> <span class="n">vFN</span><span class="p">,</span> <span class="n">vFV</span> <span class="ow">in</span> <span class="n">fixedParameters</span><span class="p">])</span>
+            <span class="n">main_cmd</span> <span class="o">=</span> <span class="n">main_cmd</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="n">cmdFix</span>
+   
+        <span class="c1">################ -&gt; Submitting job here --&gt; ###########</span>
+
+        <span class="k">if</span> <span class="n">variableParameters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">cmdVar</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">cmdVar_list</span><span class="p">):</span>
+
+                <span class="n">full_cmd</span> <span class="o">=</span> <span class="n">main_cmd</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="n">cmdVar</span>
+                <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;submit_scc.sh&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">full_cmd</span><span class="p">)</span>
+
+                <span class="n">fullScript</span> <span class="o">=</span> <span class="n">bashScript</span>
+                <span class="n">tmp_jobName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jobName</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">jobNumber</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                    <span class="n">tmp_jobName</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="si">%i</span><span class="s2">&quot;</span><span class="o">%</span><span class="n">i</span>
+
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">jobNameExtra</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">fullScript</span> <span class="o">=</span> <span class="n">bashScript</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;*jobName*&#39;</span><span class="p">,</span> <span class="n">tmp_jobName</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">cmdVar_jobName_extra_list</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        
+                <span class="n">fullScript</span> <span class="o">=</span> <span class="n">fullScript</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;*command*&quot;</span><span class="p">,</span> <span class="n">full_cmd</span><span class="p">)</span>
+                <span class="c1">#print(fullScript)</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">fullScript</span><span class="p">)</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s1">&#39;qsub submit_scc.sh&#39;</span><span class="p">)</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s1">&#39;rm submit_scc.sh&#39;</span><span class="p">)</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.05</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">full_cmd</span> <span class="o">=</span> <span class="n">main_cmd</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;submit_scc.sh&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">full_cmd</span><span class="p">)</span>
+            <span class="n">fullScript</span> <span class="o">=</span> <span class="n">bashScript</span>
+            <span class="n">tmp_jobName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jobName</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">jobNumber</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="n">tmp_jobName</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="si">%i</span><span class="s2">&quot;</span><span class="o">%</span><span class="mi">0</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">jobNameExtra</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">fullScript</span> <span class="o">=</span> <span class="n">bashScript</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;*jobName*&#39;</span><span class="p">,</span> <span class="n">tmp_jobName</span><span class="p">)</span>
+        
+            <span class="n">fullScript</span> <span class="o">=</span> <span class="n">fullScript</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;*command*&quot;</span><span class="p">,</span> <span class="n">full_cmd</span><span class="p">)</span>
+            <span class="c1">#print(fullScript)</span>
+            
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">fullScript</span><span class="p">)</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s1">&#39;qsub submit_scc.sh&#39;</span><span class="p">)</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s1">&#39;rm submit_scc.sh&#39;</span><span class="p">)</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.05</span><span class="p">)</span></div></div>
+
+
+    <span class="c1">#$ -pe omp 4 submission.sh \n</span>
+    <span class="c1">#$ -l mem_per_core=4G# more memory \n</span>
+    <span class="c1">#$ -M mbukov@bu.edu \n</span>
+
+<span class="c1">#    source activate py27</span>
+<span class="c1">#~/.conda/envs/py27/bin/python main_RL.py 2 1 2 1</span>
+<span class="c1">#!/bin/bash -login</span>
+<span class="c1">#$ -P fheating</span>
+<span class="c1">#$ -N jobRL_1_2_1_4</span>
+<span class="c1">#$ -l h_rt=12:00:00</span>
+<span class="c1">#$ -m ae</span>
+<span class="c1">#$ -m n</span>
+<span class="c1">#$ -pe omp 4 submission.sh #request more processors</span>
+<span class="c1">#$ -l mem_per_core=4G# more memory</span>
+<span class="c1">#$ -M mbukov@bu.edu</span>
+
+
+
+    
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../masta.html">JobSubmitSCC</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../masta.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Alexandre Day.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
