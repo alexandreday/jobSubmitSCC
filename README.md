@@ -8,5 +8,5 @@ git clone https://github.com/alexandreday/jobSubmitSCC.git
 cd jobSubmitSCC/
 pip install .
 ```
-That's it ! You can import the ```ezsub.EZSUB()``` class and submit your jobs really easily. Check out the example file for more info on the format of the command.
+That's it ! You can import the ```ezsub.EZSUB()``` class and submit your jobs really easily. Check out the example file for more info on the format of the command or just try running it.
 
