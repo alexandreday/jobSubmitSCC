@@ -3,7 +3,7 @@ import numpy as np
 
 ezsub = EZSUB( 
     projectName="fheating",
-    jobName="hola", 
+    jobName="QMC", 
     jobNameExtra=[("T","%.2f"),("alpha","%.5f")]#,
     #email = 'agrday@bu.edu'
     )

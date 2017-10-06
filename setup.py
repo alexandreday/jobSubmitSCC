@@ -1,13 +1,11 @@
 from setuptools import setup
 
-setup(name='tsne_visual',
-      version='0.2',
-      description='Python/C++ simple tools for running and visualizing t-SNE for low dimensional embeddings',
-      url='https://github.com/alexandreday/tsne_visual',
+setup(name='ezsub',
+      version='0.0',
+      description='Simple tool for running lots of jobs on the scc using the familiar python (3) syntax',
+      url='https://github.com/alexandreday/jobSubmitSCC',
       author='Alexandre Day',
       author_email='alexandre.day1@gmail.com',
       license='MIT',
-      packages=['tsne_visual'],
-      zip_safe=False,
-      include_package_data=True
-)
+      packages=['ezsub'],
+      zip_safe=False)
