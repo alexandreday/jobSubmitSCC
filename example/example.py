@@ -2,12 +2,10 @@ from ezsub import EZSUB
 import numpy as np
 
 ezsub = EZSUB( 
-    projectName="fheating",
-    jobName="QMC", 
-    jobNameExtra=[("T","%.2f"),("alpha","%.5f")],
-    test=True
+    projectName = "fheating",
+    jobName = "QMC", 
+    jobNameExtra = [("T","%.2f"),("alpha","%.5f")]
     #email = 'agrday@bu.edu'
-    #,test=True
 )
 
 ezsub.submit(

@@ -68,7 +68,7 @@ class EZSUB:
         if self.jobNameExtra is None:
             bashScript = bashScript.replace('*jobName*', self.jobName)
         else:
-            jobName_str = ""
+            jobName_str = self.jobName
             if fixedParameters is not None:
                 for fP in fixedParameters:
                     if fP[0] in self.jobNameExtra.keys():
@@ -80,17 +80,18 @@ class EZSUB:
         if variableParameters is not None:
             vParNames = [v[0] for v in variableParameters]
             vParIterables = [v[1] for v in variableParameters]
+            print(vParNames)
+            print(vParIterables)
             n_varPar = len(vParNames)
     
             for values in list(itertools.product(*vParIterables)):
                 tmp_name_to_value = dict(zip(vParNames, values))
                 cmdVar_list.append(" ".join([vParNames[i]+"="+"%.3f"%vPV for i, vPV in enumerate(values)]))
                 if self.jobNameExtra is not None:
+                    tmp = jobName_str + "_"
                     for vPN in vParNames:
-                        tmp = jobName_str
                         if vPN in self.jobNameExtra.keys():
                             tmp += (vPN+self.jobNameExtra[vPN]%tmp_name_to_value[vPN]+"_")
-                
                     cmdVar_jobName_extra_list.append(tmp[:-1])
         
         if fixedParameters is not None:
@@ -112,7 +113,7 @@ class EZSUB:
                     tmp_jobName += "%i"%i
 
                 if self.jobNameExtra is not None:
-                    fullScript = bashScript.replace('*jobName*', tmp_jobName + "_" + cmdVar_jobName_extra_list[i])
+                    fullScript = bashScript.replace('*jobName*', cmdVar_jobName_extra_list[i])
         
                 fullScript = fullScript.replace("*command*", full_cmd)
                 #print(fullScript)
