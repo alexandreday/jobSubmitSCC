@@ -2,28 +2,28 @@ import numpy as np
 import os, time, itertools
 
 def template():
-    return """
-    #!/bin/bash -login\n
-    #$ -P *projectName*\n 
-    #$ -N *jobName*\n 
-    #$ -l h_rt=*wallTime*\n
-    #$ -m ae\n
-    #$ -m n\n
-    #$ -M *email*\n
-    *command*
-    """
+    return """#!/bin/bash -login
+#$ -P *projectName*
+#$ -N *jobName*
+#$ -l h_rt=*wallTime*
+#$ -m ae
+#$ -m n
+#$ -M *email*
+*command*
+"""
 
 class EZSUB:
     """Python 3 script for easily submitting jobs on the SCC !
     """
 
-    def __init__(self, projectName, jobName, jobNameExtra= None, wallTime=(2,0,0), email = None, jobNumber = True):
+    def __init__(self, projectName, jobName, jobNameExtra= None, wallTime=(2,0,0), email = None, jobNumber = True, test=False):
         self.projectName = projectName
         self.jobName = jobName
         self.wallTime = "{:02d}:{:02d}:{:02d}".format(*wallTime)
         self.email = email    
         self.jobNameExtra = dict(jobNameExtra)
         self.jobNumber = jobNumber
+        self.test = test
 
     def submit(self, command, fixedParameters = None, variableParameters = None):
         """
@@ -118,8 +118,9 @@ class EZSUB:
                 #print(fullScript)
                 f.write(fullScript)
                 f.close()
-                os.system('qsub submit_scc.sh')
-                os.system('rm submit_scc.sh')
+                if self.test is False:
+                    os.system('qsub submit_scc.sh')
+                    os.system('rm submit_scc.sh')
                 time.sleep(0.05)
         else:
             full_cmd = main_cmd
@@ -137,8 +138,9 @@ class EZSUB:
             #print(fullScript)
             
             f.write(fullScript)
-            os.system('qsub submit_scc.sh')
-            os.system('rm submit_scc.sh')
+            if self.test is False:
+                os.system('qsub submit_scc.sh')
+                os.system('rm submit_scc.sh')
             f.close()
             time.sleep(0.05)
     
