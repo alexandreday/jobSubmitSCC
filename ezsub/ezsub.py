@@ -23,6 +23,8 @@ class EZSUB:
         self.email = email
         if jobNameExtra is not None:
             self.jobNameExtra = dict(jobNameExtra)
+        else:
+            self.jobNameExtra = None
         self.jobNumber = jobNumber
         self.test = test
 
