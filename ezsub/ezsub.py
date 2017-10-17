@@ -20,8 +20,9 @@ class EZSUB:
         self.projectName = projectName
         self.jobName = jobName
         self.wallTime = "{:02d}:{:02d}:{:02d}".format(*wallTime)
-        self.email = email    
-        self.jobNameExtra = dict(jobNameExtra)
+        self.email = email
+		if jobNameExtra is not None:    
+        	self.jobNameExtra = dict(jobNameExtra)
         self.jobNumber = jobNumber
         self.test = test
 
