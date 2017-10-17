@@ -142,9 +142,9 @@ class EZSUB:
             #print(fullScript)
             
             f.write(fullScript)
+            f.close()
             if self.test is False:
                 os.system('qsub submit_scc.sh')
                 os.system('rm submit_scc.sh')
-            f.close()
             time.sleep(0.05)
     
