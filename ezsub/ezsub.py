@@ -7,21 +7,34 @@ def template():
 #$ -N *jobName*
 #$ -l h_rt=*wallTime*
 #$ -m ae
+#$ -m n
+#$ -M *email*
+*command*
+"""
+
+def template_par():
+    return """#!/bin/bash -login
+#$ -P *projectName*
+#$ -N *jobName*
+#$ -l h_rt=*wallTime*
+#$ -m ae
 #$ -pe omp 4
 #$ -m n
 #$ -M *email*
 *command*
 """
 
+
 class EZSUB:
     """Python 3 script for easily submitting jobs on the SCC !
     """
 
-    def __init__(self, projectName, jobName, jobNameExtra= None, wallTime=(2,0,0), email = None, jobNumber = True, test=False):
+    def __init__(self, projectName, jobName, jobNameExtra= None, OMP=None, wallTime=(2,0,0), email = None, jobNumber = True, test=False):
         self.projectName = projectName
         self.jobName = jobName
         self.wallTime = "{:02d}:{:02d}:{:02d}".format(*wallTime)
         self.email = email
+        self.OMP = OMP
         if jobNameExtra is not None:
             self.jobNameExtra = dict(jobNameExtra)
         else:
@@ -56,8 +69,10 @@ class EZSUB:
                 - format of specified parameters is always parameter=parameter_value, with parameter a string and parameter_value a numeric type
         
         """
-
-        bashScript = template() # template format for scc qsub ...
+        if self.OMP is not None:
+            bashScript = template_par() # template format for scc qsub ...
+        else:
+            bashScript = template() # template format for scc qsub ...
         bashScript = bashScript.replace('*projectName*', self.projectName)
         bashScript = bashScript.replace('*wallTime*', self.wallTime)
 
