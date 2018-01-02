@@ -7,6 +7,7 @@ def template():
 #$ -N *jobName*
 #$ -l h_rt=*wallTime*
 #$ -m ae
+#$ -pe omp 4
 #$ -m n
 #$ -M *email*
 *command*
