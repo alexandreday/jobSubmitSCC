@@ -106,10 +106,10 @@ class EZSUB:
             for values in list(itertools.product(*vParIterables)):
                 tmp_name_to_value = dict(zip(vParNames, values))
 
-                cmdVar_list = []
+                cmd_line = []
                 for i, vPV in enumerate(values):
-                    cmdVar_list.append(vParNames[i]+"=%s"%str(vPV))
-                cmdVar_list = " ".join(cmdVar_list)
+                    cmd_line.append(vParNames[i]+"=%s"%str(vPV))
+                cmdVar_list.append(" ".join(cmd_line))
 
                 if self.jobNameExtra is not None:
                     tmp = jobName_str + "_"
