@@ -105,7 +105,12 @@ class EZSUB:
     
             for values in list(itertools.product(*vParIterables)):
                 tmp_name_to_value = dict(zip(vParNames, values))
-                cmdVar_list.append(" ".join([vParNames[i]+"="+"%.3f"%vPV for i, vPV in enumerate(values)]))
+
+                cmdVar_list = []
+                for i, vPV in enumerate(values):
+                    cmdVar_list.append(vParNames[i]+"=%s"%str(vPV))
+                cmdVar_list = " ".join(cmdVar_list)
+
                 if self.jobNameExtra is not None:
                     tmp = jobName_str + "_"
                     for vPN in vParNames:
@@ -162,5 +167,5 @@ class EZSUB:
             if self.test is False:
                 os.system('qsub submit_scc.sh')
                 os.system('rm submit_scc.sh')
-            time.sleep(0.05)
+            time.sleep(0.01)
     
