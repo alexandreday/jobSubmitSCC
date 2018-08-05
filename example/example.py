@@ -4,6 +4,7 @@ import numpy as np
 ezsub = EZSUB( 
     projectName = "fheating",
     jobName = "QMC", 
+    wallTime=(2,0,0),
     jobNameExtra = [("T","%.2f"),("alpha","%.5f")]
     #email = 'agrday@bu.edu'
 )
